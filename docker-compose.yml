@@ -1,6 +1,14 @@
 version: "3.5"
 
 services:
+  cloudboard:
+    image: 'coyann/cloudboard:latest'
+    volumes:
+      - ./data/cloudboard/app.db:/app/prisma/app.db
+    expose:
+      - 80
+    restart: always
+
   nginx-proxy-manager:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: always
@@ -9,24 +17,17 @@ services:
       - '81:81'
       - '443:443'
     volumes:
-      - ./data/nginx-proxy-manager/data:/data:z
-      - ./data/nginx-proxy-manager/letsencrypt:/etc/letsencrypt:z
-    depends_on:
-      - jellyfin
-      - coder
-      - gitea
-      - registry
-      - element
-      - wiki
+      - ./data/nginx-proxy-manager/data:/data
+      - ./data/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
 
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
     volumes:
-      - ./data/jellyfin/config:/config:z
-      - ./data/jellyfin/cache:/cache:z
-      - ./data/jellyfin/media:/media:z
-      - ./data/jellyfin/media2:/media2:z
+      - ./data/jellyfin/config:/config
+      - ./data/jellyfin/cache:/cache
+      - ./data/jellyfin/media:/media
+      - ./data/jellyfin/media2:/media2
     restart: always
     expose:
       - 8096
@@ -41,7 +42,7 @@ services:
       - USER_GID=1000
     restart: always
     volumes:
-      - ./data/gitea:/data:z
+      - ./data/gitea:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     expose:
@@ -52,11 +53,10 @@ services:
   coder:
     image: codercom/coder:1.29.0
     volumes:
-      - ./data/coder:/var/run/coder:z
-      - /var/run/docker.sock:/var/run/docker.sock:z
-    privileged: true
-    expose:
-      - 7080
+      - ./data/coder:/var/run/coder
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 7080:7080
     restart: always
   
   registry:
@@ -65,12 +65,13 @@ services:
     expose:
       - 5000
     volumes:
-      - ./data/registry:/var/lib/registry:z
+      - ./data/registry:/var/lib/registry
   
   element:
     image: vectorim/element-web:latest
     expose:
       - 80
+    restart: always
 
   wiki-db:
     image: postgres:11-alpine
@@ -80,7 +81,7 @@ services:
       POSTGRES_USER: wikijs
     restart: unless-stopped
     volumes:
-      - ./data/wiki/db:/var/lib/postgresql/data:z
+      - ./data/wiki/db:/var/lib/postgresql/data
 
   wiki:
     image: ghcr.io/requarks/wiki:2
@@ -105,3 +106,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     privileged: true
     restart: always
+  
+  ghost:
+    image: ghost:4-alpine
+    volumes:
+      - ./data/ghost:/var/lib/ghost/content
+    restart: always
+    expose:
+      - 2368
+    environment:
+      url: https://ghost.home.local
