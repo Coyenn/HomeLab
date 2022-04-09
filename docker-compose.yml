@@ -94,7 +94,7 @@ services:
       DB_USER: wikijs
       DB_PASS: wikijsrocks
       DB_NAME: wiki
-      VIRTUAL_HOST: wiki.home.local
+      VIRTUAL_HOST: wiki.home.cloud
       VIRTUAL_PORT: 3000
     restart: always
     expose:
@@ -115,4 +115,14 @@ services:
     expose:
       - 2368
     environment:
-      url: https://ghost.home.local
+      url: https://ghost.home.cloud
+  
+  dnsmasq:
+    image: jpillora/dnsmasq
+    restart: always
+    ports:
+      - "192.168.0.15:53:53/udp"
+    expose:
+      - 8080
+    volumes:
+      - ./data/dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
