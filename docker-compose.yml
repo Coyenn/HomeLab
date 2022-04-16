@@ -4,7 +4,7 @@ services:
   cloudboard:
     image: 'coyann/cloudboard:latest'
     volumes:
-      - ./data/cloudboard/app.db:/app/prisma/app.db
+      - ./data/cloudboard/app.db:/app/prisma/app.db:rw
     expose:
       - 80
     restart: always
@@ -97,6 +97,8 @@ services:
       VIRTUAL_HOST: wiki.home.cloud
       VIRTUAL_PORT: 3000
     restart: always
+    links:
+      - wiki-db
     expose:
       - 3000
   
@@ -116,12 +118,12 @@ services:
       - 2368
     environment:
       url: https://ghost.home.cloud
-  
+
   dnsmasq:
     image: jpillora/dnsmasq
     restart: always
     ports:
-      - "192.168.0.15:53:53/udp"
+      - 192.168.0.15:53:53/udp
     expose:
       - 8080
     volumes:
